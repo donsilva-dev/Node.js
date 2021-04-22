@@ -18,6 +18,17 @@ function ckeckCurso(req,res,next) {
     if(!req.body.name) {
         return res.status(400).json({error:'Nome do curso é OBRIGATORIO!'})
     }
+    return next()
+}
+
+function ckeckIndexCurso(req, res, next) {
+    const curso = cursos[req.params.index]
+
+    if (!curso) {
+        return res.status(400).json({error:'O curso não existe'})
+    }
+
+    req.curso = curso
 
     return next()
 }
@@ -28,10 +39,8 @@ server.get('/cursos', (req, res) =>{
 })
 
 // Listando um unico cursos
-server.get('/cursos/:index', (req, res) => {
-    const {index} = req.params
-
-    res.json(cursos[index])
+server.get('/cursos/:index', ckeckIndexCurso, (req, res) => {
+    res.json(req.curso)
 })
 
 // Criando um novo cursos
@@ -42,7 +51,7 @@ server.post('/cursos', ckeckCurso, (req, res) => {
 })
 
 // Atualizando um cursos existente
-server.put('/cursos/:index', ckeckCurso, (req, res) => {
+server.put('/cursos/:index', ckeckCurso, ckeckIndexCurso, (req, res) => {
 
     const { index } = req.params
     const { name } = req.body
@@ -54,7 +63,7 @@ server.put('/cursos/:index', ckeckCurso, (req, res) => {
 
 // Delete
 
-server.delete('/cursos/:index', (req, res) => {
+server.delete('/cursos/:index', ckeckIndexCurso, (req, res) => {
     const { index } = req.params
 
     cursos.splice(index, 1)
