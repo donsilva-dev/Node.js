@@ -6,12 +6,26 @@ server.use(express.json())
 
 const cursos = ['Node.js', 'Express', 'JavaScripts', 'java', 'ruby']
 
+// Middleware global
+server.use((req, res, next) => {
+    console.log(`URL CHAMADA: ${req.url}`)
+
+    return next()
+
+})
+
+function ckeckCurso(req,res,next) {
+    if(!req.body.name) {
+        return res.status(400).json({error:'Nome do curso é OBRIGATORIO!'})
+    }
+
+    return next()
+}
 
 // Listando todos os cursos
 server.get('/cursos', (req, res) =>{
     res.json(cursos)
 })
-
 
 // Listando um unico cursos
 server.get('/cursos/:index', (req, res) => {
@@ -21,15 +35,14 @@ server.get('/cursos/:index', (req, res) => {
 })
 
 // Criando um novo cursos
-server.post('/cursos', (req, res) => {
+server.post('/cursos', ckeckCurso, (req, res) => {
     const { name } = req.body
     cursos.push(name)
     return res.json(cursos)
 })
 
-
 // Atualizando um cursos existente
-server.put('/cursos/:index', (req, res) => {
+server.put('/cursos/:index', ckeckCurso, (req, res) => {
 
     const { index } = req.params
     const { name } = req.body
